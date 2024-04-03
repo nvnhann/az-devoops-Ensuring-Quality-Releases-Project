@@ -84,6 +84,6 @@ stages:
             inputs:
               azureSubscription: '$(serviceConnection)'
               appType: 'webApp'
-              appName: 'WAS-EQR'
+              appName: 'fakeapiappkaizen'
               package: '$(Pipeline.Workspace)/drop-fakerestapi/$(Build.BuildId)-fakerestapi.zip'
               deploymentMethod: 'auto'
