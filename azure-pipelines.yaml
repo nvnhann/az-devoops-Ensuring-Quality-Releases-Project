@@ -85,4 +85,5 @@ stages:
               azureSubscription: '$(serviceConnection)'
               appName: 'fakeapiappkaizen'
               appType: webApp
+              deploymentMethod: 'auto'
               package: $(Pipeline.Workspace)/drop-fakerestapi/$(Build.BuildId)-fakerestapi.zip
