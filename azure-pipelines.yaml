@@ -69,21 +69,21 @@ stages:
         displayName: 'Upload Selenium Package'
         artifact: selenium
 
-- stage: Deploy
+- stage: WebAppDeployment
+  displayName: Web App Deployment
   jobs:
   - deployment: FakeRestAPI
-    displayName: 'Deploy Web App to APP Service'
     pool: myPool
-    environment: 'TEST'
+    environment: 'WAP-TEST'
     strategy:
       runOnce:
         deploy:
           steps:
           - task: AzureWebApp@1
-            displayName: 'Deploy CodingAPP to App Service'
+            displayName: 'Deploy Azure Web App'
             inputs:
               azureSubscription: '$(serviceConnection)'
-              appName: 'fakeapiappkaizen'
-              appType: webApp
-              deploymentMethod: zipDeploy
-              package: $(Pipeline.Workspace)/drop-fakerestapi/$(Build.BuildId)-fakerestapi.zip
+              appType: 'webApp'
+              appName: 'WAS-EQR'
+              package: '$(Pipeline.Workspace)/drop-fakerestapi/$(Build.BuildId)-fakerestapi.zip'
+              deploymentMethod: 'auto'
