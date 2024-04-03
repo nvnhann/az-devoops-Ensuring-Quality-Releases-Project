@@ -18,66 +18,19 @@ stages:
   jobs:
   - job: BuildInfrastructure
     steps:
-
-      - task: InstallSSHKey@0
-        displayName: 'Install SSH Key'
-        inputs:
-          knownHostsEntry: 'your hosts entry'
-          sshPublicKey: '$(myPubKey)'
-          sshKeySecureFile: 'id_rsa'
-
       - task: TerraformInstaller@0
         displayName: 'Install Terraform'
         inputs:
           terraformVersion: '0.13.5'
       
-      - task: TerraformTaskV1@0
+      - task: TerraformInstaller@0
         displayName: 'Terraform Init'
-          inputs:
-            provider: 'azurerm'
-            command: 'init'
-            workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
-            backendServiceArm: '$(terraformServiceConnection)'
-            backendAzureRmResourceGroupName: '$(terraformstoragerg)'
-            backendAzureRmStorageAccountName: '$(terraformstorageaccount)'
-            backendAzureRmContainerName: '$(terraformcontainer)'
-            backendAzureRmKey: 'terraform.tfstate'
-      
-      - task: TerraformTaskV1@0
-        displayName: 'Terraform Apply'
         inputs:
           provider: 'azurerm'
-          command: 'apply'
+          command: 'init'
           workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
-          commandOptions: '-auto-approve -var="public_key=$(myPubKey))"'
-          environmentServiceNameAzureRM: '$(terraformServiceConnection)'
-
-      - task: ArchiveFiles@2
-        displayName: 'Archive FakeRestAPI Web App'
-        inputs:
-          rootFolderOrFile: 'automatedtesting/jmeter/fakerestapi'
-          includeRootFolder: false
-          archiveType: 'zip'
-          archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId)-fakerestapi.zip'
-
-      - publish: $(Build.ArtifactStagingDirectory)/$(Build.BuildId)-fakerestapi.zip
-        displayName: 'Upload Fakerestapi Package'
-        artifact: drop-fakerestapi
-
-- stage: Deploy
-  jobs:
-  - deployment: FakeRestAPI
-    displayName: 'Deploy Web App to APP Service'
-    pool: myPool
-    environment: 'TEST'
-    strategy:
-      runOnce:
-        deploy:
-          steps:
-          - task: AzureWebApp@1
-            displayName: 'Deploy CodingAPP to App Service'
-            inputs:
-              azureSubscription: '$(serviceConnection)'
-              appName: 'codingapp-appservice'
-              appType: webApp
-              package: $(Pipeline.Workspace)/drop-fakerestapi/$(Build.BuildId)-fakerestapi.zip
+          backendServiceArm: '$(terraformServiceConnection)'
+          backendAzureRmResourceGroupName: '$(terraformstoragerg)'
+          backendAzureRmStorageAccountName: '$(terraformstorageaccount)'
+          backendAzureRmContainerName: '$(terraformcontainer)'
+          backendAzureRmKey: 'terraform.tfstate'
