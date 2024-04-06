@@ -6,10 +6,10 @@ pool: myPool
 
 variables:
   python.version: '3.7.6'
-  azureServiceConnectionId: 'a3a7c26e-4d37-405c-91fb-89548a312d92'
+  azureServiceConnectionId: '336ba999-91e6-441b-af93-0d280a702f5d'
   projectRoot: $(System.DefaultWorkingDirectory)
   environmentName: 'test'
-  serviceConnection: 'a3a7c26e-4d37-405c-91fb-89548a312d92'
+  serviceConnection: '336ba999-91e6-441b-af93-0d280a702f5d'
 
 
 stages:
@@ -87,3 +87,50 @@ stages:
               appName: 'fakeapiappkaizen'
               package: '$(Pipeline.Workspace)/drop-fakerestapi/$(Build.BuildId)-fakerestapi.zip'
               deploymentMethod: 'auto'
+
+- stage: Tests
+  jobs: 
+    - job: Tests
+      pool: myPool
+      displayName: 'Tests'
+      steps:
+        - task: Bash@3
+          inputs:
+            targetType: 'inline'
+            script: |
+              newman run ./automatedtesting/postman/testapi.postman_collection.json --reporters cli,junit --reporter-junit-export ./regressiontest.xml --suppress-exit-code
+          displayName: 'Run Newman Regression Test'
+        - task: PublishTestResults@2
+          inputs:
+            testResultsFiles: '$(System.DefaultWorkingDirectory)/*.xml'
+            searchFolder: '$(System.DefaultWorkingDirectory)'
+          displayName: 'Publish Test Results'
+        - task: Bash@3
+          inputs:
+            targetType: 'inline'
+            script: |
+              ~/apache-jmeter-5.6.3/bin/jmeter -n -t ./automatedtesting/jmeter/stress_test.jmx -l ./automatedtesting/jmeter/stress_test_result.csv -e -o ./automatedtesting/jmeter/stress_test_html_report/ -j ./automatedtesting/jmeter/jmeter_stress_test.log
+          displayName: 'Jmeter Stress Test' 
+        - task: Bash@3
+          inputs:
+            targetType: 'inline'
+            script: |
+              ~/apache-jmeter-5.6.3/bin/jmeter -n -t ./automatedtesting/jmeter/endurance_test.jmx -l ./automatedtesting/jmeter/Endurance_test_result.csv -e -o ./automatedtesting/jmeter/Endurance_test_html_report/ -j ./automatedtesting/jmeter/jmeter_endurance_test.log
+          displayName: 'Jmeter Endurance Test' 
+        - task: PublishBuildArtifacts@1
+          inputs:
+            PathtoPublish: 'automatedtesting/jmeter'
+            ArtifactName: 'jmeter'
+            publishLocation: 'Container'
+        - task: Bash@3
+          inputs:
+            targetType: 'inline'
+            script: |
+              if [ ! -d /var/log/selenium ]; then
+                sudo mkdir /var/log/selenium
+                sudo chmod 777 /var/log/selenium
+              fi
+              cd ./automatedtesting/selenium
+              python3 login.py
+          displayName: 'Run UI Test'
+
