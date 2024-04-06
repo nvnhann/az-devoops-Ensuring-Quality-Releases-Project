@@ -6,10 +6,10 @@ pool: myPool
 
 variables:
   python.version: '3.7.6'
-  azureServiceConnectionId: 'a3a7c26e-4d37-405c-91fb-89548a312d92'
+  azureServiceConnectionId: '336ba999-91e6-441b-af93-0d280a702f5d'
   projectRoot: $(System.DefaultWorkingDirectory)
   environmentName: 'test'
-  serviceConnection: 'a3a7c26e-4d37-405c-91fb-89548a312d92'
+  serviceConnection: '336ba999-91e6-441b-af93-0d280a702f5d'
 
 
 stages:
