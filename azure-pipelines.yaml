@@ -91,9 +91,10 @@ stages:
 - stage: Tests
   jobs: 
     - job: Tests
+      pool: myPool
       displayName: 'Tests'
       steps:
-        - task: Npm@1
+        - task: Npm@1 
           inputs:
             workingDir: '$(System.DefaultWorkingDirectory)'
             verbose: false
