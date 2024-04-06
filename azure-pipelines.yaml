@@ -94,14 +94,12 @@ stages:
       pool: myPool
       displayName: 'Tests'
       steps:
-        - task: Npm@1 
+        - task: Bash@3
           inputs:
-            workingDir: '$(System.DefaultWorkingDirectory)'
-            verbose: false
-          displayName: 'Install Newman'
-        - script: newman run ./automatedtesting/postman/testapi.postman_collection.json --reporters cli,junit --reporter-junit-export ./regressiontest.xml --suppress-exit-code
+            targetType: 'inline'
+            script: |
+              newman run ./automatedtesting/postman/testapi.postman_collection.json --reporters cli,junit --reporter-junit-export ./regressiontest.xml --suppress-exit-code
           displayName: 'Run Newman Regression Test'
-          workingDirectory: '$(System.DefaultWorkingDirectory)'
         - task: PublishTestResults@2
           inputs:
             testResultsFiles: '$(System.DefaultWorkingDirectory)/*.xml'
